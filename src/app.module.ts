@@ -12,6 +12,11 @@ import configuration from './config/index';
 import { UserEntity } from './user/user/entities/user.entity';
 import { RoleEntity } from './user/role/entities/role.entity';
 import { JwtAuthGuard } from './common/guards/AuthGuard';
+import { PasswordController } from './password/password.controller';
+import { PasswordModule } from './password/password.module';
+
+import { PasswordEntity } from './password/entities/password.entity';
+import { GroupEntity } from './password/entities/group.entity';
 
 @Module({
   imports: [
@@ -39,12 +44,18 @@ import { JwtAuthGuard } from './common/guards/AuthGuard';
         } as TypeOrmModuleOptions;
       },
     }),
-    TypeOrmModule.forFeature([UserEntity, RoleEntity]),
+    TypeOrmModule.forFeature([
+      UserEntity,
+      RoleEntity,
+      PasswordEntity,
+      GroupEntity,
+    ]),
     AuthModule,
     UserModule,
     RoleModule,
+    PasswordModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, PasswordController],
   providers: [
     AppService,
     {
