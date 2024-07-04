@@ -29,7 +29,7 @@ export class PasswordEntity extends BaseEntity {
     name: 'uri',
     comment: '项目地址',
   })
-  public url: string;
+  public uri: string;
 
   @Column({
     type: 'varchar',
