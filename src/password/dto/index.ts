@@ -10,6 +10,7 @@ export class CreatePasswordDto {
   @Length(1, 300)
   uri: string;
 
+  @IsOptional()
   @IsString()
   @Length(1, 300)
   username: string;

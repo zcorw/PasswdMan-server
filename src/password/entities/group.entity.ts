@@ -4,6 +4,7 @@ import {
   PrimaryGeneratedColumn,
   OneToMany,
   ManyToOne,
+  Unique,
 } from 'typeorm';
 import { BaseEntity } from 'src/common/entities/base';
 import { PasswordEntity } from './password.entity';
@@ -12,6 +13,7 @@ import { UserEntity } from 'src/user/user/entities/user.entity';
 @Entity('group', {
   comment: '群组表',
 })
+@Unique(['title', 'user'])
 export class GroupEntity extends BaseEntity {
   @PrimaryGeneratedColumn({
     type: 'bigint',

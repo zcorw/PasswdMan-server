@@ -55,6 +55,13 @@ export class PasswordEntity extends BaseEntity {
   })
   public remark: string;
 
+  @Column({
+    type: 'text',
+    name: 'fields',
+    comment: '字段',
+  })
+  public fields: string;
+
   @ManyToOne(() => GroupEntity, (group) => group.passwords)
   group: GroupEntity;
 
