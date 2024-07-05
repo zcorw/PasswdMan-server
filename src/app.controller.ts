@@ -17,7 +17,6 @@ export class AppController {
 
   @Post('/register')
   @HttpCode(200)
-  @SkipAuth()
   register(@Body() user: RegisterDto): Promise<ResultData> {
     return this.appService.register(user);
   }
