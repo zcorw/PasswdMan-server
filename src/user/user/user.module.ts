@@ -13,7 +13,7 @@ import { UserService } from './user.service';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (config: ConfigService) => ({
-        secret: config.get('jwt.secretkey'),
+        secret: config.get('crypto.jwtSecret'),
         // signOptions: { expiresIn: config.get('jwt.expiresin') },
       }),
       inject: [ConfigService],

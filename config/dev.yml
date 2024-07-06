@@ -36,6 +36,5 @@ db:
     bigNumberStrings: true
 # jwt 配置
 jwt:
-  secretkey: '8aeb5caddf6009bce798dd363b753dce35abc0d4bcb9d1a4aa464b0d868e3b36'
   expiresin: '5m'
   refreshExpiresIn: '2h'

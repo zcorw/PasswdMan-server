@@ -5,6 +5,7 @@ import { PasswordEntity } from './entities/password.entity';
 import { GroupEntity } from './entities/group.entity';
 import { UserEntity } from 'src/user/user/entities/user.entity';
 import { CreatePasswordDto, UpdatePasswordDto } from './dto';
+import { CryptoService } from './crypto.service';
 
 @Injectable()
 export class PasswordService {
@@ -15,6 +16,7 @@ export class PasswordService {
     private readonly userRepo: Repository<UserEntity>,
     @InjectRepository(GroupEntity)
     private readonly groupRepo: Repository<GroupEntity>,
+    private readonly crypto: CryptoService,
   ) {}
   // 根据用户ID和密码ID获取密码
   async findOne(
@@ -110,7 +112,7 @@ export class PasswordService {
     if (!group) {
       throw new BadRequestException('Group not found');
     }
-
+    password.password = this.crypto.encrypt(password.password);
     const newPassword = this.passwdRepo.create({
       ...password,
       user,
@@ -134,6 +136,7 @@ export class PasswordService {
     const groupsMap = new Map(groups.map((group) => [group.id, group]));
     const newPasswords = passwords.map((password) => {
       const group = groupsMap.get(password.groupId);
+      password.password = this.crypto.encrypt(password.password);
       return this.passwdRepo.create({
         ...password,
         user,
