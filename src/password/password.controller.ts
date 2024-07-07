@@ -1,8 +1,10 @@
 import {
   Controller,
   Post,
+  Get,
   UploadedFile,
   UseInterceptors,
+  HttpCode,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -11,6 +13,7 @@ import * as fs from 'fs';
 import { parse } from 'fast-csv';
 import { PasswordService } from './password.service';
 import { PasswordEntity } from './entities/password.entity';
+import { GetUser } from 'src/common/decorators/GetUserDecorator';
 import { CreatePasswordDto, UpdatePasswordDto } from './dto';
 import { ResultData } from 'src/common/result';
 
@@ -28,9 +31,9 @@ type bitwardenType = {
 export class PasswordController {
   constructor(private readonly passwordService: PasswordService) {}
 
-  // 接收一个csv文件并将内容打印
-  @SkipAuth()
+  // 接收一个csv文件
   @Post('import')
+  @HttpCode(200)
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -52,7 +55,6 @@ export class PasswordController {
         results.push(row);
       })
       .on('end', async () => {
-        console.log(results);
         // 筛选出所有folder字段的值
         const folders = results.reduce<string[]>((res, next) => {
           next.folder = next.folder ? next.folder : '默认群组';
@@ -92,5 +94,12 @@ export class PasswordController {
       });
 
     return ResultData.ok(null, '导入成功');
+  }
+  // 获取所有密码
+  @Get('list')
+  @HttpCode(200)
+  async list(@GetUser() user: any) {
+    const res = await this.passwordService.findAll(user.user.userId);
+    return ResultData.ok(res);
   }
 }

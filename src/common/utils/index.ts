@@ -36,3 +36,28 @@ export function GenerateUUID(): string {
   const uuid = uuidv4();
   return uuid.replaceAll('-', '');
 }
+
+export function parseTimeStringToMilliseconds(timeString: string) {
+  let totalMilliseconds = 0;
+  const regex = /(\d+)([hms])/g;
+  let match;
+
+  while ((match = regex.exec(timeString)) !== null) {
+    const value = parseInt(match[1]);
+    const unit = match[2];
+
+    switch (unit) {
+      case 'h':
+        totalMilliseconds += value * 60 * 60 * 1000;
+        break;
+      case 'm':
+        totalMilliseconds += value * 60 * 1000;
+        break;
+      case 's':
+        totalMilliseconds += value * 1000;
+        break;
+    }
+  }
+
+  return totalMilliseconds;
+}
