@@ -1,4 +1,11 @@
-import { IsOptional, IsString, IsNumber, Length } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNumber,
+  IsInt,
+  Length,
+  Min,
+} from 'class-validator';
 
 export class CreatePasswordDto {
   @IsString()
@@ -57,4 +64,18 @@ export class UpdatePasswordDto {
   @IsOptional()
   @IsNumber()
   groupId: number;
+}
+
+export class FindPasswordDto {
+  @IsOptional()
+  @IsInt()
+  groupId: number;
+
+  @IsInt()
+  @Min(1)
+  page: number;
+
+  @IsInt()
+  @Min(1)
+  limit: number;
 }

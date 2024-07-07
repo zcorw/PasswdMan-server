@@ -17,4 +17,8 @@ export class ResultData {
   static fail(code: number, msg?: string, data?: any) {
     return new ResultData(code, data, msg);
   }
+
+  static pageData(data: any[], total: number) {
+    return new ResultData(ResultCode.SUCCESS, { data, total }, 'success');
+  }
 }

@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { PasswordEntity } from './entities/password.entity';
 import { GroupEntity } from './entities/group.entity';
 import { UserEntity } from 'src/user/user/entities/user.entity';
-import { CreatePasswordDto, UpdatePasswordDto } from './dto';
+import { CreatePasswordDto, UpdatePasswordDto, FindPasswordDto } from './dto';
 import { CryptoService } from './crypto.service';
 
 @Injectable()
@@ -33,13 +33,22 @@ export class PasswordService {
   }
 
   // 根据用户ID获取密码
-  async findAll(userId: UserEntity['userId']): Promise<PasswordEntity[]> {
-    return await this.passwdRepo.find({
+  async findAll(
+    userId: UserEntity['userId'],
+    pageData: FindPasswordDto,
+  ): Promise<{ data: PasswordEntity[]; total: number }> {
+    const [result, total] = await this.passwdRepo.findAndCount({
       where: {
         user: { userId },
       },
-      relations: ['user', 'group'],
+      skip: (pageData.page - 1) * pageData.limit,
+      take: pageData.limit,
     });
+
+    return {
+      data: result,
+      total,
+    };
   }
 
   // 根据用户ID和群组ID获取密码

@@ -5,6 +5,7 @@ import {
   UploadedFile,
   UseInterceptors,
   HttpCode,
+  Query,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -14,7 +15,7 @@ import { parse } from 'fast-csv';
 import { PasswordService } from './password.service';
 import { PasswordEntity } from './entities/password.entity';
 import { GetUser } from 'src/common/decorators/GetUserDecorator';
-import { CreatePasswordDto, UpdatePasswordDto } from './dto';
+import { CreatePasswordDto, UpdatePasswordDto, FindPasswordDto } from './dto';
 import { ResultData } from 'src/common/result';
 
 type bitwardenType = {
@@ -98,8 +99,8 @@ export class PasswordController {
   // 获取所有密码
   @Get('list')
   @HttpCode(200)
-  async list(@GetUser() user: any) {
-    const res = await this.passwordService.findAll(user.user.userId);
-    return ResultData.ok(res);
+  async list(@GetUser() user: any, @Query() data: FindPasswordDto) {
+    const res = await this.passwordService.findAll(user.user.userId, data);
+    return ResultData.pageData(res.data, res.total);
   }
 }
