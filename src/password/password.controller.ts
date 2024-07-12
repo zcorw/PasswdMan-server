@@ -15,8 +15,9 @@ import { parse } from 'fast-csv';
 import { PasswordService } from './password.service';
 import { PasswordEntity } from './entities/password.entity';
 import { GetUser } from 'src/common/decorators/GetUserDecorator';
-import { CreatePasswordDto, UpdatePasswordDto, FindPasswordDto } from './dto';
+import { CreatePasswordDto, FindPasswordByIdDto } from './dto';
 import { ResultData } from 'src/common/result';
+import { CryptoService } from './crypto.service';
 
 type bitwardenType = {
   folder: string;
@@ -30,7 +31,10 @@ type bitwardenType = {
 };
 @Controller('password')
 export class PasswordController {
-  constructor(private readonly passwordService: PasswordService) {}
+  constructor(
+    private readonly passwordService: PasswordService,
+    private readonly crypto: CryptoService,
+  ) {}
 
   // 接收一个csv文件
   @Post('import')
@@ -99,8 +103,19 @@ export class PasswordController {
   // 获取所有密码
   @Get('list')
   @HttpCode(200)
-  async list(@GetUser() user: any, @Query() data: FindPasswordDto) {
-    const res = await this.passwordService.findAll(user.user.userId, data);
-    return ResultData.pageData(res.data, res.total);
+  async list(@GetUser() user: any, @Query() data: FindPasswordByIdDto) {
+    const res = await this.passwordService.findPwdAfterId(
+      user.user.userId,
+      data.id || 1,
+      data.limit,
+      data.groupId,
+    );
+    return ResultData.pageData(
+      res.data.map((item) => ({
+        ...item,
+        password: this.crypto.decrypt(item.password),
+      })),
+      res.total,
+    );
   }
 }

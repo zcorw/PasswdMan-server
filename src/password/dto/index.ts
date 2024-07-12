@@ -6,6 +6,7 @@ import {
   Length,
   Min,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreatePasswordDto {
   @IsString()
@@ -66,16 +67,35 @@ export class UpdatePasswordDto {
   groupId: number;
 }
 
-export class FindPasswordDto {
+export class FindPasswordByIdDto {
+  @IsOptional()
+  @IsInt()
+  groupId: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Type(() => Number)
+  id: number;
+
+  @IsInt()
+  @Min(1)
+  @Type(() => Number)
+  limit: number;
+}
+
+export class FindPasswordByPageDto {
   @IsOptional()
   @IsInt()
   groupId: number;
 
   @IsInt()
-  @Min(1)
+  @Min(0)
+  @Type(() => Number)
   page: number;
 
   @IsInt()
   @Min(1)
+  @Type(() => Number)
   limit: number;
 }

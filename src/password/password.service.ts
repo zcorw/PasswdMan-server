@@ -4,7 +4,11 @@ import { Repository } from 'typeorm';
 import { PasswordEntity } from './entities/password.entity';
 import { GroupEntity } from './entities/group.entity';
 import { UserEntity } from 'src/user/user/entities/user.entity';
-import { CreatePasswordDto, UpdatePasswordDto, FindPasswordDto } from './dto';
+import {
+  CreatePasswordDto,
+  UpdatePasswordDto,
+  FindPasswordByPageDto,
+} from './dto';
 import { CryptoService } from './crypto.service';
 
 @Injectable()
@@ -35,7 +39,7 @@ export class PasswordService {
   // 根据用户ID获取密码
   async findAll(
     userId: UserEntity['userId'],
-    pageData: FindPasswordDto,
+    pageData: FindPasswordByPageDto,
   ): Promise<{ data: PasswordEntity[]; total: number }> {
     const [result, total] = await this.passwdRepo.findAndCount({
       where: {
@@ -63,6 +67,36 @@ export class PasswordService {
       },
       relations: ['user', 'group'],
     });
+  }
+
+  async findPwdAfterId(
+    userId: UserEntity['userId'],
+    pId: PasswordEntity['pId'],
+    limit: number,
+    groupId?: GroupEntity['id'],
+  ) {
+    const count = await this.passwdRepo.count({
+      where: {
+        user: { userId: userId },
+        group: { id: groupId },
+      },
+    });
+    const query = await this.passwdRepo
+      .createQueryBuilder('password')
+      .where('password.password_id > :pId', { pId })
+      .andWhere('password.userUserId = :userId', { userId });
+    if (groupId) {
+      query.andWhere('password.groupId = :groupId', { groupId });
+    }
+    const items = await query
+      .orderBy('password.update_time', 'DESC')
+      .take(limit)
+      .getMany();
+
+    return {
+      data: items,
+      total: count,
+    };
   }
 
   // 用文本对项目名、用户名、uri模糊查询

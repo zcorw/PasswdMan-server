@@ -13,6 +13,6 @@ import { GroupEntity } from 'src/password/entities/group.entity';
     ConfigModule,
   ],
   providers: [PasswordService, CryptoService],
-  exports: [PasswordService],
+  exports: [PasswordService, CryptoService],
 })
 export class PasswordModule {}

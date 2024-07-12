@@ -5,7 +5,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { validate } from 'class-validator';
-import { plainToClass } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class FormValidationPipe implements PipeTransform {
@@ -17,7 +17,7 @@ export class FormValidationPipe implements PipeTransform {
       return value;
     }
     // 将对象转换为 Class 来验证
-    const object = plainToClass(metatype, value);
+    const object = plainToInstance(metatype, value);
     const errors = await validate(object);
     // const errors = await validate(object, {
     //   forbidUnknownValues: true, //尝试验证未知对象会立即失败
