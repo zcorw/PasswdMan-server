@@ -106,9 +106,7 @@ export class PasswordController {
   async list(@GetUser() user: any, @Query() data: FindPasswordByIdDto) {
     const res = await this.passwordService.findPwdAfterId(
       user.user.userId,
-      data.id || 1,
-      data.limit,
-      data.groupId,
+      data,
     );
     return ResultData.pageData(
       res.data.map((item) => ({

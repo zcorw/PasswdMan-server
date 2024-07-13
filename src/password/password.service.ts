@@ -8,6 +8,7 @@ import {
   CreatePasswordDto,
   UpdatePasswordDto,
   FindPasswordByPageDto,
+  FindPasswordByIdDto,
 } from './dto';
 import { CryptoService } from './crypto.service';
 
@@ -69,51 +70,41 @@ export class PasswordService {
     });
   }
 
-  async findPwdAfterId(
+  private buildPasswordQuery(
     userId: UserEntity['userId'],
-    pId: PasswordEntity['pId'],
-    limit: number,
-    groupId?: GroupEntity['id'],
+    { id, groupId }: Pick<FindPasswordByIdDto, 'id' | 'groupId'>,
   ) {
-    const count = await this.passwdRepo.count({
-      where: {
-        user: { userId: userId },
-        group: { id: groupId },
-      },
-    });
-    const query = await this.passwdRepo
-      .createQueryBuilder('password')
-      .where('password.password_id > :pId', { pId })
-      .andWhere('password.userUserId = :userId', { userId });
+    const query = this.passwdRepo.createQueryBuilder('password');
+    query.where('password.userUserId = :userId', { userId });
+    if (id) {
+      query.andWhere('password.password_id < :pId', { pId: id });
+    }
     if (groupId) {
       query.andWhere('password.groupId = :groupId', { groupId });
     }
-    const items = await query
-      .orderBy('password.update_time', 'DESC')
+    return query;
+  }
+
+  async findPwdAfterId(
+    userId: UserEntity['userId'],
+    { id, limit, groupId, text }: FindPasswordByIdDto,
+  ) {
+    const query = this.buildPasswordQuery(userId, { id, groupId });
+    if (text) {
+      query.andWhere(
+        'LOWER(password.name) LIKE LOWER(:text) OR LOWER(password.uri) LIKE LOWER(:text) OR LOWER(password.username) LIKE LOWER(:text)',
+        { text: `%${text}%` },
+      );
+    }
+    const [items, count] = await query
+      .orderBy('password.password_id', 'DESC')
       .take(limit)
-      .getMany();
+      .getManyAndCount();
 
     return {
       data: items,
       total: count,
     };
-  }
-
-  // 用文本对项目名、用户名、uri模糊查询
-  async findByText(
-    userId: UserEntity['userId'],
-    text: string,
-  ): Promise<PasswordEntity[]> {
-    return await this.passwdRepo
-      .createQueryBuilder('password')
-      .leftJoinAndSelect('password.user', 'user')
-      .leftJoinAndSelect('password.group', 'group')
-      .where(
-        'password.name LIKE :text OR password.uri LIKE :text OR password.username LIKE :text',
-        { text: `%${text}%` },
-      )
-      .andWhere('user.userId = :userId', { userId })
-      .getMany();
   }
 
   // 获取群组列表

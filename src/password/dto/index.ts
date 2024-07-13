@@ -69,6 +69,11 @@ export class UpdatePasswordDto {
 
 export class FindPasswordByIdDto {
   @IsOptional()
+  @IsString()
+  @Length(0, 300)
+  text: string;
+
+  @IsOptional()
   @IsInt()
   groupId: number;
 
