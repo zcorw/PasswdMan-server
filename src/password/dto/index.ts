@@ -74,7 +74,7 @@ export class FindPasswordByIdDto {
   text: string;
 
   @IsOptional()
-  @IsInt()
+  @IsString()
   groupId: number;
 
   @IsOptional()

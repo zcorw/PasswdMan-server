@@ -50,9 +50,12 @@ export class PasswordController {
       }),
     }),
   )
-  async import(@UploadedFile() file: Express.Multer.File) {
+  async import(
+    @GetUser() user: any,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
     const results: bitwardenType[] = [];
-    const userId = 1;
+    const userId = user.user.userId;
 
     fs.createReadStream(file.path)
       .pipe(parse({ headers: true }))
@@ -115,5 +118,13 @@ export class PasswordController {
       })),
       res.total,
     );
+  }
+
+  // 获取群组列表
+  @Get('groups')
+  @HttpCode(200)
+  async groups(@GetUser() user: any) {
+    const res = await this.passwordService.getGroups(user.user.userId);
+    return ResultData.ok(res);
   }
 }

@@ -36,5 +36,9 @@ db:
     bigNumberStrings: true
 # jwt 配置
 jwt:
-  expiresin: '5m'
+  expiresin: '1h'
   refreshExpiresIn: '2h'
+# 用户配置
+user:
+  # 是否开启注册
+  enableRegister: true

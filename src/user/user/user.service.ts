@@ -40,11 +40,11 @@ export class UserService {
   ): Promise<boolean> {
     const user = await this.userRepo
       .createQueryBuilder('user')
-      .addSelect(['password', 'salt'])
-      .where('user.userId = :id', { id: userId })
+      .select(['user.password', 'user.salt'])
+      .where('user.user_id = :id', { id: userId })
       .getOne();
     const { hashedPassword } = await hashPassword(password, user.salt);
-    return hashedPassword !== user.password;
+    return hashedPassword === user.password;
   }
   /**
    * 生成令牌
