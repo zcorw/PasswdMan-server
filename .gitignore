@@ -60,4 +60,5 @@ config/*.yml
 !config/dev.yml
 
 uploads
+db_data
 

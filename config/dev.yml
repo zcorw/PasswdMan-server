@@ -37,7 +37,6 @@ db:
 # jwt 配置
 jwt:
   expiresin: '1h'
-  refreshExpiresIn: '2h'
 # 用户配置
 user:
   # 是否开启注册
