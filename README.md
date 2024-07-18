@@ -13,7 +13,8 @@ app:
 # 数据库配置
 db:
   mysql:
-    host: 'localhost'
+    # 将数据库地址改为mysql容器名称
+    host: 'passwdman-server-db-1'
     username: 'root'
     password: '123456'
     database: 'passwdman-test'
