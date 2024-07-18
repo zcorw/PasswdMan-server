@@ -77,3 +77,7 @@ networks:
   internal:
     driver: bridge
 ```
+## 快速开始
+```bash
+docker-compose up --build -d
+```
