@@ -10,10 +10,10 @@ import { plainToInstance } from 'class-transformer';
 @Injectable()
 export class FormValidationPipe implements PipeTransform {
   async transform(value: any, metadata: ArgumentMetadata) {
-    const { metatype } = metadata;
+    const { metatype, type } = metadata;
 
     // 如果没有传入验证规则，则不验证，直接返回数据
-    if (!metatype || !this.toValidate(metatype)) {
+    if (!metatype || !this.toValidate(metatype) || type === 'custom') {
       return value;
     }
     // 将对象转换为 Class 来验证
