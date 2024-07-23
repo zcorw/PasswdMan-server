@@ -26,6 +26,7 @@ export class PasswordEntity extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 300,
+    nullable: true,
     name: 'uri',
     comment: '项目地址',
   })
@@ -34,6 +35,7 @@ export class PasswordEntity extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 300,
+    nullable: true,
     name: 'username',
     comment: '用户名',
   })
@@ -50,6 +52,7 @@ export class PasswordEntity extends BaseEntity {
 
   @Column({
     type: 'text',
+    nullable: true,
     name: 'remark',
     comment: '备注',
   })
@@ -57,6 +60,7 @@ export class PasswordEntity extends BaseEntity {
 
   @Column({
     type: 'text',
+    nullable: true,
     name: 'fields',
     comment: '字段',
   })

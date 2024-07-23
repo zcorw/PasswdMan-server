@@ -15,12 +15,12 @@ export class CreatePasswordDto {
 
   @IsOptional()
   @IsString()
-  @Length(1, 300)
+  @Length(0, 300)
   uri: string;
 
   @IsOptional()
   @IsString()
-  @Length(1, 300)
+  @Length(0, 300)
   username: string;
 
   @IsString()
@@ -29,10 +29,10 @@ export class CreatePasswordDto {
 
   @IsOptional()
   @IsString()
-  @Length(1, 1000)
+  @Length(0, 1000)
   remark: string;
 
-  @IsNumber()
+  @IsString()
   groupId: number;
 }
 

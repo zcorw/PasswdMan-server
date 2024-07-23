@@ -6,18 +6,18 @@ import {
   UseInterceptors,
   HttpCode,
   Query,
+  Body,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { SkipAuth } from 'src/common/decorators/SkipAuthDecorator';
 import * as fs from 'fs';
 import { parse } from 'fast-csv';
 import { PasswordService } from './password.service';
-import { PasswordEntity } from './entities/password.entity';
 import { GetUser } from 'src/common/decorators/GetUserDecorator';
 import { CreatePasswordDto, FindPasswordByIdDto } from './dto';
 import { ResultData } from 'src/common/result';
 import { CryptoService } from './crypto.service';
+import { FormValidationPipe } from 'src/common/pipes/FormValidationPipe';
 
 type bitwardenType = {
   folder: string;
@@ -125,6 +125,16 @@ export class PasswordController {
   @HttpCode(200)
   async groups(@GetUser() user: any) {
     const res = await this.passwordService.getGroups(user.user.userId);
+    return ResultData.ok(res);
+  }
+  // 添加密码
+  @Post('add')
+  @HttpCode(200)
+  async add(
+    @GetUser() user: any,
+    @Body(FormValidationPipe) data: CreatePasswordDto,
+  ) {
+    const res = await this.passwordService.create(user.user.userId, data);
     return ResultData.ok(res);
   }
 }
