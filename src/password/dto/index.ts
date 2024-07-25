@@ -104,3 +104,10 @@ export class FindPasswordByPageDto {
   @Type(() => Number)
   limit: number;
 }
+
+export class OnePasswordByIdDto {
+  @IsInt()
+  @Min(0)
+  @Type(() => Number)
+  id: number;
+}

@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PasswordEntity } from './entities/password.entity';
@@ -9,6 +13,7 @@ import {
   UpdatePasswordDto,
   FindPasswordByPageDto,
   FindPasswordByIdDto,
+  OnePasswordByIdDto,
 } from './dto';
 import { CryptoService } from './crypto.service';
 
@@ -105,6 +110,20 @@ export class PasswordService {
       data: items,
       total: count,
     };
+  }
+
+  async findPwdById(userId: UserEntity['userId'], { id }: OnePasswordByIdDto) {
+    const query = this.passwdRepo.createQueryBuilder('password');
+    query
+      .where('password.userUserId = :userId', { userId })
+      .andWhere('password.password_id = :pId', { pId: id });
+    const passwd = await query.addSelect('password.password').getOne();
+    if (!passwd) {
+      throw new UnauthorizedException(
+        'You do not have access to this password',
+      );
+    }
+    return this.crypto.decrypt(passwd.password);
   }
 
   // 获取群组列表

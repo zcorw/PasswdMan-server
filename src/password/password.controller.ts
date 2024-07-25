@@ -14,7 +14,11 @@ import * as fs from 'fs';
 import { parse } from 'fast-csv';
 import { PasswordService } from './password.service';
 import { GetUser } from 'src/common/decorators/GetUserDecorator';
-import { CreatePasswordDto, FindPasswordByIdDto } from './dto';
+import {
+  CreatePasswordDto,
+  FindPasswordByIdDto,
+  OnePasswordByIdDto,
+} from './dto';
 import { ResultData } from 'src/common/result';
 import { CryptoService } from './crypto.service';
 import { FormValidationPipe } from 'src/common/pipes/FormValidationPipe';
@@ -31,10 +35,7 @@ type bitwardenType = {
 };
 @Controller('password')
 export class PasswordController {
-  constructor(
-    private readonly passwordService: PasswordService,
-    private readonly crypto: CryptoService,
-  ) {}
+  constructor(private readonly passwordService: PasswordService) {}
 
   // 接收一个csv文件
   @Post('import')
@@ -111,13 +112,7 @@ export class PasswordController {
       user.user.userId,
       data,
     );
-    return ResultData.pageData(
-      res.data.map((item) => ({
-        ...item,
-        password: this.crypto.decrypt(item.password),
-      })),
-      res.total,
-    );
+    return ResultData.pageData(res.data, res.total);
   }
 
   // 获取群组列表
@@ -136,5 +131,15 @@ export class PasswordController {
   ) {
     const res = await this.passwordService.create(user.user.userId, data);
     return ResultData.ok(res);
+  }
+  // 根据id获取密码
+  @Get('find')
+  @HttpCode(200)
+  async find(@GetUser() user: any, @Query() data: OnePasswordByIdDto) {
+    const password = await this.passwordService.findPwdById(
+      user.user.userId,
+      data,
+    );
+    return ResultData.ok(password);
   }
 }

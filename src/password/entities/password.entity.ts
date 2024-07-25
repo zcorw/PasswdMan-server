@@ -45,6 +45,7 @@ export class PasswordEntity extends BaseEntity {
     type: 'varchar',
     length: 300,
     nullable: false,
+    select: false,
     name: 'password',
     comment: '密码',
   })
