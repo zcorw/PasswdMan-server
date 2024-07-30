@@ -61,4 +61,5 @@ config/*.yml
 
 uploads
 db_data
-
+./docker-compose.yml
+./Dockerfile
