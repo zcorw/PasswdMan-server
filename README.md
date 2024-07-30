@@ -28,10 +28,18 @@ user:
   # 是否开启注册
   enableRegister: true
 ```
+复制Dockerfile到根目录
+```bash
+cp docker/Dockerfile Dockerfile
+```
 修改Dockerfile中项目运行端口号，要与上面配置一致
 ```
 # 暴露应用运行的端口（例如 8080）
 EXPOSE 8080
+```
+复制docker-compose.yml到根目录
+```bash
+cp docker/docker-compose.yml docker-compose.yml
 ```
 修改docker-compose中配置
 ```
