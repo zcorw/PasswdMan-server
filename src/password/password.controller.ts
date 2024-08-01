@@ -2,11 +2,15 @@ import {
   Controller,
   Post,
   Get,
+  Put,
+  Delete,
   UploadedFile,
   UseInterceptors,
   HttpCode,
   Query,
   Body,
+  Param,
+  BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -18,9 +22,9 @@ import {
   CreatePasswordDto,
   FindPasswordByIdDto,
   OnePasswordByIdDto,
+  UpdatePasswordDto,
 } from './dto';
 import { ResultData } from 'src/common/result';
-import { CryptoService } from './crypto.service';
 import { FormValidationPipe } from 'src/common/pipes/FormValidationPipe';
 
 type bitwardenType = {
@@ -141,5 +145,29 @@ export class PasswordController {
       data,
     );
     return ResultData.ok(password);
+  }
+  // 修改密码
+  @Put('update/:id')
+  @HttpCode(200)
+  async update(
+    @GetUser() user: any,
+    @Param('id') id: string,
+    @Body(FormValidationPipe) data: UpdatePasswordDto,
+  ) {
+    if (id === '') {
+      throw new BadRequestException('id不能为空');
+    }
+    const res = await this.passwordService.update(user.user.userId, +id, data);
+    return ResultData.ok(res);
+  }
+  // 删除密码
+  @Delete('delete/:id')
+  @HttpCode(200)
+  async delete(@GetUser() user: any, @Param('id') id: string) {
+    if (id === '') {
+      throw new BadRequestException('id不能为空');
+    }
+    const res = await this.passwordService.delete(user.user.userId, +id);
+    return ResultData.ok(res);
   }
 }

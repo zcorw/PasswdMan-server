@@ -281,13 +281,16 @@ export class PasswordService {
   async update(
     userId: UserEntity['userId'],
     pId: PasswordEntity['pId'],
-    password: UpdatePasswordDto,
+    passwordData: UpdatePasswordDto,
   ): Promise<PasswordEntity> {
     const existingPassword = await this.findOne(userId, pId);
     if (!existingPassword) {
       throw new BadRequestException('Password not found');
     }
-    Object.assign(existingPassword, password);
+    if (passwordData.password) {
+      passwordData.password = this.crypto.encrypt(passwordData.password);
+    }
+    Object.assign(existingPassword, passwordData);
     return await this.passwdRepo.save(existingPassword);
   }
 }

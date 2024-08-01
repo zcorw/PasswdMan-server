@@ -1,11 +1,4 @@
-import {
-  IsOptional,
-  IsString,
-  IsNumber,
-  IsInt,
-  Length,
-  Min,
-} from 'class-validator';
+import { IsOptional, IsString, IsInt, Length, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreatePasswordDto {
@@ -44,27 +37,23 @@ export class UpdatePasswordDto {
 
   @IsOptional()
   @IsString()
-  @Length(1, 300)
+  @Length(0, 300)
   uri: string;
 
   @IsOptional()
   @IsString()
-  @Length(1, 300)
+  @Length(0, 300)
   username: string;
 
   @IsOptional()
   @IsString()
-  @Length(1, 300)
+  @Length(0, 300)
   password: string;
 
   @IsOptional()
   @IsString()
-  @Length(1, 1000)
+  @Length(0, 1000)
   remark: string;
-
-  @IsOptional()
-  @IsNumber()
-  groupId: number;
 }
 
 export class FindPasswordByIdDto {
