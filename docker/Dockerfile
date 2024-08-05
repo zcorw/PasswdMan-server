@@ -14,11 +14,8 @@ RUN yarn
 # 复制项目文件
 COPY . .
 
-# 复制启动脚本
-COPY start.sh .
-
 # 暴露应用运行的端口（例如 8080）
 EXPOSE 8080
 
 # 启动应用
-CMD ["./start.sh"]
+CMD ["npm", "run", "start:prod"]
