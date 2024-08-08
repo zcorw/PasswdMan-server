@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { BaseEntity } from 'src/common/entities/base';
 import { PasswordEntity } from './password.entity';
+import { NoteEntity } from './note.entity';
 import { UserEntity } from 'src/user/user/entities/user.entity';
 
 @Entity('group', {
@@ -32,6 +33,9 @@ export class GroupEntity extends BaseEntity {
 
   @OneToMany(() => PasswordEntity, (passwd) => passwd.group)
   public passwords: PasswordEntity[];
+
+  @OneToMany(() => NoteEntity, (passwd) => passwd.group)
+  public notes: NoteEntity[];
 
   @ManyToOne(() => UserEntity, (user) => user.groups)
   public user: UserEntity;

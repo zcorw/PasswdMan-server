@@ -17,19 +17,19 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as fs from 'fs';
 import { parse } from 'fast-csv';
-import { PasswordService } from './password.service';
+import { NoteService } from './note.service';
 import { GetUser } from 'src/common/decorators/GetUserDecorator';
-import { CreatePasswordDto, UpdatePasswordDto } from './dto';
-import { FindByIdDto, OneByIdDto } from './dto/page';
+import { CreateNoteDto, OneByIdDto, UpdateNoteDto } from './dto/note';
+import { FindByIdDto } from './dto/page';
 import { ResultData } from 'src/common/result';
 import { FormValidationPipe } from 'src/common/pipes/FormValidationPipe';
 import type { bitwardenType } from 'src/types/importFile';
 import { GroupService } from './group.service';
 
-@Controller('password')
-export class PasswordController {
+@Controller('note')
+export class NoteController {
   constructor(
-    private readonly passwordService: PasswordService,
+    private readonly noteService: NoteService,
     private readonly groupService: GroupService,
   ) {}
 
@@ -76,9 +76,9 @@ export class PasswordController {
             userId,
             folders,
           );
-          const passwords: CreatePasswordDto[] = results
-            .map<CreatePasswordDto | null>((item) => {
-              if (item.type === 'login') {
+          const notes: CreateNoteDto[] = results
+            .map<CreateNoteDto | null>((item) => {
+              if (item.type === 'note') {
                 const group = groups.find(
                   (group) => group.title === item.folder,
                 );
@@ -88,8 +88,7 @@ export class PasswordController {
                 return {
                   name: item.name,
                   uri: item.login_uri,
-                  username: item.login_username,
-                  password: item.login_password,
+                  note: item.notes,
                   remark: '',
                   fields: item.fields,
                   groupId: group.id,
@@ -100,8 +99,9 @@ export class PasswordController {
             })
             .reduce((res, next) => (next ? res.concat([next]) : res), []);
           // 这里可以进一步处理 CSV 数据
-          await this.passwordService.batchCreate(userId, passwords);
+          await this.noteService.batchCreate(userId, notes);
           fs.unlinkSync(file.path);
+          resolve('导入成功');
         });
     });
     return promise
@@ -116,38 +116,25 @@ export class PasswordController {
   @Get('list')
   @HttpCode(200)
   async list(@GetUser() user: any, @Query() data: FindByIdDto) {
-    const res = await this.passwordService.findPwdAfterId(
-      user.user.userId,
-      data,
-    );
+    const res = await this.noteService.findAfterId(user.user.userId, data);
     return ResultData.pageData(res.data, res.total);
   }
 
-  // 获取群组列表
-  @Get('groups')
-  @HttpCode(200)
-  async groups(@GetUser() user: any) {
-    const res = await this.groupService.getGroups(user.user.userId);
-    return ResultData.ok(res);
-  }
-  // 添加密码
+  // 添加笔记
   @Post('add')
   @HttpCode(200)
   async add(
     @GetUser() user: any,
-    @Body(FormValidationPipe) data: CreatePasswordDto,
+    @Body(FormValidationPipe) data: CreateNoteDto,
   ) {
-    const res = await this.passwordService.create(user.user.userId, data);
+    const res = await this.noteService.create(user.user.userId, data);
     return ResultData.ok(res);
   }
   // 根据id获取密码
   @Get('find')
   @HttpCode(200)
   async find(@GetUser() user: any, @Query() data: OneByIdDto) {
-    const password = await this.passwordService.findPwdById(
-      user.user.userId,
-      data,
-    );
+    const password = await this.noteService.findPwdById(user.user.userId, data);
     return ResultData.ok(password);
   }
   // 修改密码
@@ -156,12 +143,12 @@ export class PasswordController {
   async update(
     @GetUser() user: any,
     @Param('id') id: string,
-    @Body(FormValidationPipe) data: UpdatePasswordDto,
+    @Body(FormValidationPipe) data: UpdateNoteDto,
   ) {
     if (id === '') {
       throw new BadRequestException('id不能为空');
     }
-    const res = await this.passwordService.update(user.user.userId, +id, data);
+    const res = await this.noteService.update(user.user.userId, +id, data);
     return ResultData.ok(res);
   }
   // 删除密码
@@ -171,7 +158,7 @@ export class PasswordController {
     if (id === '') {
       throw new BadRequestException('id不能为空');
     }
-    const res = await this.passwordService.delete(user.user.userId, +id);
+    const res = await this.noteService.delete(user.user.userId, +id);
     return ResultData.ok(res);
   }
 }

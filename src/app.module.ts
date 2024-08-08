@@ -13,10 +13,12 @@ import { UserEntity } from './user/user/entities/user.entity';
 import { RoleEntity } from './user/role/entities/role.entity';
 import { JwtAuthGuard } from './common/guards/AuthGuard';
 import { PasswordController } from './password/password.controller';
+import { NoteController } from './password/note.controller';
 import { PasswordModule } from './password/password.module';
 
 import { PasswordEntity } from './password/entities/password.entity';
 import { GroupEntity } from './password/entities/group.entity';
+import { NoteEntity } from './password/entities/note.entity';
 
 @Module({
   imports: [
@@ -49,13 +51,14 @@ import { GroupEntity } from './password/entities/group.entity';
       RoleEntity,
       PasswordEntity,
       GroupEntity,
+      NoteEntity,
     ]),
     AuthModule,
     UserModule,
     RoleModule,
     PasswordModule,
   ],
-  controllers: [AppController, PasswordController],
+  controllers: [AppController, PasswordController, NoteController],
   providers: [
     AppService,
     {

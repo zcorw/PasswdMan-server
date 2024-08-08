@@ -1,5 +1,4 @@
-import { IsOptional, IsString, IsInt, Length, Min } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsOptional, IsString, Length } from 'class-validator';
 
 export class CreatePasswordDto {
   @IsString()
@@ -24,6 +23,11 @@ export class CreatePasswordDto {
   @IsString()
   @Length(0, 1000)
   remark: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(0, 1000)
+  fields: string;
 
   @IsString()
   groupId: number;
@@ -54,49 +58,9 @@ export class UpdatePasswordDto {
   @IsString()
   @Length(0, 1000)
   remark: string;
-}
-
-export class FindPasswordByIdDto {
-  @IsOptional()
-  @IsString()
-  @Length(0, 300)
-  text: string;
 
   @IsOptional()
   @IsString()
-  groupId: number;
-
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  @Type(() => Number)
-  id: number;
-
-  @IsInt()
-  @Min(1)
-  @Type(() => Number)
-  limit: number;
-}
-
-export class FindPasswordByPageDto {
-  @IsOptional()
-  @IsInt()
-  groupId: number;
-
-  @IsInt()
-  @Min(0)
-  @Type(() => Number)
-  page: number;
-
-  @IsInt()
-  @Min(1)
-  @Type(() => Number)
-  limit: number;
-}
-
-export class OnePasswordByIdDto {
-  @IsInt()
-  @Min(0)
-  @Type(() => Number)
-  id: number;
+  @Length(0, 1000)
+  fields: string;
 }

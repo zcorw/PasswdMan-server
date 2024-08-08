@@ -8,14 +8,10 @@ import { Repository } from 'typeorm';
 import { PasswordEntity } from './entities/password.entity';
 import { GroupEntity } from './entities/group.entity';
 import { UserEntity } from 'src/user/user/entities/user.entity';
-import {
-  CreatePasswordDto,
-  UpdatePasswordDto,
-  FindPasswordByPageDto,
-  FindPasswordByIdDto,
-  OnePasswordByIdDto,
-} from './dto';
+import { CreatePasswordDto, UpdatePasswordDto } from './dto';
+import { FindByIdDto, FindByPageDto, OneByIdDto } from './dto/page';
 import { CryptoService } from './crypto.service';
+import { GroupService } from './group.service';
 
 @Injectable()
 export class PasswordService {
@@ -27,6 +23,7 @@ export class PasswordService {
     @InjectRepository(GroupEntity)
     private readonly groupRepo: Repository<GroupEntity>,
     private readonly crypto: CryptoService,
+    private readonly group: GroupService,
   ) {}
   // 根据用户ID和密码ID获取密码
   async findOne(
@@ -45,7 +42,7 @@ export class PasswordService {
   // 根据用户ID获取密码
   async findAll(
     userId: UserEntity['userId'],
-    pageData: FindPasswordByPageDto,
+    pageData: FindByPageDto,
   ): Promise<{ data: PasswordEntity[]; total: number }> {
     const [result, total] = await this.passwdRepo.findAndCount({
       where: {
@@ -77,7 +74,7 @@ export class PasswordService {
 
   private buildPasswordQuery(
     userId: UserEntity['userId'],
-    { id, groupId }: Pick<FindPasswordByIdDto, 'id' | 'groupId'>,
+    { id, groupId }: Pick<FindByIdDto, 'id' | 'groupId'>,
   ) {
     const query = this.passwdRepo.createQueryBuilder('password');
     query.where('password.userUserId = :userId', { userId });
@@ -92,7 +89,7 @@ export class PasswordService {
 
   async findPwdAfterId(
     userId: UserEntity['userId'],
-    { id, limit, groupId, text }: FindPasswordByIdDto,
+    { id, limit, groupId, text }: FindByIdDto,
   ) {
     const query = this.buildPasswordQuery(userId, { id, groupId });
     if (text) {
@@ -112,7 +109,7 @@ export class PasswordService {
     };
   }
 
-  async findPwdById(userId: UserEntity['userId'], { id }: OnePasswordByIdDto) {
+  async findPwdById(userId: UserEntity['userId'], { id }: OneByIdDto) {
     const query = this.passwdRepo.createQueryBuilder('password');
     query
       .where('password.userUserId = :userId', { userId })
@@ -124,28 +121,6 @@ export class PasswordService {
       );
     }
     return this.crypto.decrypt(passwd.password);
-  }
-
-  // 获取群组列表
-  async getGroups(userId: UserEntity['userId']): Promise<GroupEntity[]> {
-    return await this.groupRepo.find({
-      where: {
-        user: { userId },
-      },
-    });
-  }
-
-  // 通过群组名获取群组
-  async getGroupByName(
-    userId: UserEntity['userId'],
-    name: string,
-  ): Promise<GroupEntity> {
-    return await this.groupRepo.findOne({
-      where: {
-        user: { userId },
-        title: name,
-      },
-    });
   }
 
   // 创建密码
@@ -185,7 +160,7 @@ export class PasswordService {
     if (!user) {
       throw new BadRequestException('User not found');
     }
-    const groups = await this.getGroups(userId);
+    const groups = await this.group.getGroups(userId);
     const groupsMap = new Map(groups.map((group) => [group.id, group]));
     const newPasswords = passwords.map((password) => {
       const group = groupsMap.get(password.groupId);
@@ -222,47 +197,6 @@ export class PasswordService {
       user,
     });
     return await this.groupRepo.save(newGroup);
-  }
-
-  // 批量创建群组，如果群组已经存在，则忽略
-  async batchCreateGroup(
-    userId: UserEntity['userId'],
-    groupNames: string[],
-  ): Promise<GroupEntity[]> {
-    const user = await this.userRepo.findOne({
-      where: { userId },
-    });
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
-    const existingGroups = await this.groupRepo
-      .createQueryBuilder('group')
-      .innerJoin('group.user', 'user')
-      .where('user.user_id = :userId', { userId })
-      .andWhere('group.title IN (:...groupNames)', { groupNames })
-      .getMany();
-    const existingGroupsMap = new Map(
-      existingGroups.map((group) => [`${userId}-${group.title}`, group]),
-    );
-
-    const newGroups = groupNames.filter(
-      (groupName) => !existingGroupsMap.has(`${userId}-${groupName}`),
-    );
-    const groupsArr = Array.from(existingGroupsMap.values());
-    if (newGroups.length > 0) {
-      const newGroupsEntity = await this.groupRepo.save(
-        newGroups.map((groupName) => {
-          return this.groupRepo.create({
-            title: groupName,
-            user,
-          });
-        }),
-      );
-      newGroupsEntity.forEach((entity) => {
-        groupsArr.push(entity);
-      });
-    }
-    return groupsArr;
   }
 
   // 删除密码
