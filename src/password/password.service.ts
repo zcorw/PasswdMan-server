@@ -1,7 +1,7 @@
 import {
   Injectable,
   BadRequestException,
-  UnauthorizedException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -116,9 +116,7 @@ export class PasswordService {
       .andWhere('password.password_id = :pId', { pId: id });
     const passwd = await query.addSelect('password.password').getOne();
     if (!passwd) {
-      throw new UnauthorizedException(
-        'You do not have access to this password',
-      );
+      throw new NotFoundException('You do not have access to this password');
     }
     return this.crypto.decrypt(passwd.password);
   }
