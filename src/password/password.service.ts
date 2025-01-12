@@ -104,7 +104,10 @@ export class PasswordService {
       .getManyAndCount();
 
     return {
-      data: items,
+      data: items.map((item) => ({
+        ...item,
+        password: this.crypto.decrypt(item.password),
+      })),
       total: count,
     };
   }

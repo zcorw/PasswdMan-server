@@ -19,6 +19,7 @@ import * as fs from 'fs';
 import { parse } from 'fast-csv';
 import { PasswordService } from './password.service';
 import { GetUser } from 'src/common/decorators/GetUserDecorator';
+import { EncryptoInterceptor } from 'src/common/interceptor/EncryptoInterceptor';
 import { CreatePasswordDto, UpdatePasswordDto } from './dto';
 import { FindByIdDto, OneByIdDto } from './dto/page';
 import { ResultData } from 'src/common/result';
@@ -115,7 +116,9 @@ export class PasswordController {
   // 获取所有密码
   @Get('list')
   @HttpCode(200)
+  @UseInterceptors(EncryptoInterceptor)
   async list(@GetUser() user: any, @Query() data: FindByIdDto) {
+    console.log(user.user);
     const res = await this.passwordService.findPwdAfterId(
       user.user.userId,
       data,

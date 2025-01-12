@@ -1,4 +1,12 @@
-import { IsOptional, IsString, IsInt, Length, Min } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsInt,
+  Length,
+  Min,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class FindByIdDto {
@@ -44,4 +52,14 @@ export class OneByIdDto {
   @Min(0)
   @Type(() => Number)
   id: number;
+}
+
+export class PageDataDto {
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => Object)
+  data: object[];
+
+  @IsInt()
+  total: number;
 }

@@ -34,7 +34,7 @@ export function generateKeyAndIv() {
 export class AesCryptoHelper {
   // 对称加密
   static encryptWithSymmetricKey(
-    data: object,
+    data: object | unknown[],
     aesKey: string,
   ): {
     data: string;

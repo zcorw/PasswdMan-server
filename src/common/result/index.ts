@@ -1,4 +1,6 @@
 import { ResultCode } from '../enum/code';
+import { EncryptDto } from 'src/user/user/dto';
+import { AesCryptoHelper } from '../utils/cryptoUtils';
 
 export class ResultData {
   code: number;
