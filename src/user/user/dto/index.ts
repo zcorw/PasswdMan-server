@@ -1,4 +1,11 @@
-import { IsArray, IsOptional, IsString, Length } from 'class-validator';
+import {
+  IsArray,
+  IsOptional,
+  IsString,
+  ValidateNested,
+  Length,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class LoginDto {
   @IsString()
@@ -11,6 +18,29 @@ export class LoginDto {
 }
 
 export class RegisterDto extends LoginDto {}
+
+export class EncryptDto {
+  @IsString()
+  data: string;
+
+  @IsString()
+  sign: string;
+
+  @IsString()
+  iv: string;
+
+  @IsString()
+  type: string;
+}
+
+export class EncryptLoginDto {
+  @ValidateNested()
+  @Type(() => EncryptDto)
+  encryptData: EncryptDto;
+
+  @IsString()
+  aesKey: string;
+}
 
 export class UserDto {
   @IsString()

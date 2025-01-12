@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, Post, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { LoginDto, RegisterDto } from './user/user/dto';
+import { EncryptLoginDto, RegisterDto } from './user/user/dto';
 import { ResultData } from 'src/common/result';
 import { SkipAuth } from 'src/common/decorators/SkipAuthDecorator';
 import { ConfigService } from '@nestjs/config';
@@ -16,8 +16,8 @@ export class AppController {
   @Post('/login')
   @HttpCode(200)
   @SkipAuth()
-  login(@Body() user: LoginDto): Promise<ResultData> {
-    return this.appService.login(user);
+  login(@Body() data: EncryptLoginDto): Promise<ResultData> {
+    return this.appService.login(data);
   }
 
   @Post('/register')
@@ -42,5 +42,12 @@ export class AppController {
   authConfig(): ResultData {
     const enableRegister = this.configService.get('user.enableRegister');
     return ResultData.ok({ enableRegister });
+  }
+
+  @Get('/publicKey')
+  @HttpCode(200)
+  @SkipAuth()
+  publicKey(): ResultData {
+    return this.appService.getPublicKey();
   }
 }

@@ -94,6 +94,7 @@ export class UserService {
    */
   async login(
     userInfo: LoginDto,
+    aesKey: string,
   ): Promise<[ResultCode, string | { token: string }]> {
     const user = await this.userRepo.findOne({
       where: { username: userInfo.username, delFlag: DelFlagEnum.NOTDELETED },
@@ -121,6 +122,7 @@ export class UserService {
       user: userData,
       userId: userData.userId,
       username: userData.username,
+      aesKey,
     };
     this.cacheModule.set(
       `${CacheEnum.LOGIN_TOKEN_KEY}${uuid}`,

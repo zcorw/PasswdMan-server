@@ -1,7 +1,7 @@
 import { readFileSync, accessSync, constants, writeFileSync } from 'fs';
 import * as yaml from 'js-yaml';
 import { join } from 'path';
-import { generateKeyAndIv } from 'src/common/utils/generateKey';
+import { generateKeyAndIv } from 'src/common/utils/cryptoUtils';
 
 const configFileNameObj = {
   development: 'dev',
