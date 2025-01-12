@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, Post, Get } from '@nestjs/common';
 import { AppService } from './app.service';
-import { EncryptLoginDto, RegisterDto } from './user/user/dto';
+import { EncryptLoginDto } from './user/user/dto';
 import { ResultData } from 'src/common/result';
 import { SkipAuth } from 'src/common/decorators/SkipAuthDecorator';
 import { ConfigService } from '@nestjs/config';
@@ -23,7 +23,7 @@ export class AppController {
   @Post('/register')
   @HttpCode(200)
   @SkipAuth()
-  register(@Body() user: RegisterDto): Promise<ResultData> {
+  register(@Body() user: EncryptLoginDto): Promise<ResultData> {
     const enableRegister = this.configService.get('user.enableRegister');
     if (!enableRegister) {
       return Promise.resolve(

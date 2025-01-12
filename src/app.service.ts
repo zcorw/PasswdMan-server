@@ -45,8 +45,20 @@ export class AppService {
     }
   }
 
-  async register(user: RegisterDto): Promise<ResultData> {
-    const res = await this.userService.create(user);
+  async register(data: EncryptLoginDto): Promise<ResultData> {
+    let userInfo: LoginDto, aesKey: string;
+    try {
+      aesKey = this.decrypt(data.aesKey);
+      userInfo = AesCryptoHelper.decryptWithSymmetricKey(
+        data.encryptData.data,
+        data.encryptData.iv,
+        data.encryptData.sign,
+        aesKey,
+      ) as RegisterDto;
+    } catch (error) {
+      throw new ForbiddenException('Invalid signature');
+    }
+    const res = await this.userService.create(userInfo);
     await this.passwordService.createGroup(res.userId, '默认群组');
     return ResultData.ok({ userId: res.userId }, 'Register Success');
   }
