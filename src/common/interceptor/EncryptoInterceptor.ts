@@ -32,6 +32,7 @@ export class EncryptoInterceptor implements NestInterceptor {
         return {
           ...data,
           data: _data,
+          key: request.user.aesKey,
         };
       }),
     );

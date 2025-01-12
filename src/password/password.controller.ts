@@ -118,7 +118,6 @@ export class PasswordController {
   @HttpCode(200)
   @UseInterceptors(EncryptoInterceptor)
   async list(@GetUser() user: any, @Query() data: FindByIdDto) {
-    console.log(user.user);
     const res = await this.passwordService.findPwdAfterId(
       user.user.userId,
       data,
