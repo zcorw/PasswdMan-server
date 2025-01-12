@@ -45,7 +45,9 @@ export class AesCryptoHelper {
     const cipher = forge.cipher.createCipher('AES-CBC', aesKey);
     const iv = forge.random.getBytesSync(16); // 生成随机IV
     cipher.start({ iv });
-    cipher.update(forge.util.createBuffer(JSON.stringify(data)));
+    cipher.update(
+      forge.util.createBuffer(forge.util.encodeUtf8(JSON.stringify(data))),
+    );
     cipher.finish();
     return {
       data: forge.util.encode64(cipher.output.getBytes()),
