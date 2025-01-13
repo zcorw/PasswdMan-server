@@ -25,6 +25,27 @@ export class PasswordService {
     private readonly crypto: CryptoService,
     private readonly group: GroupService,
   ) {}
+  // 根据用户ID获取所有密码，不分页
+  async findAllByUserId(
+    userId: UserEntity['userId'],
+  ): Promise<PasswordEntity[]> {
+    return await this.passwdRepo
+      .find({
+        where: {
+          user: { userId },
+        },
+        relations: ['user', 'group'],
+      })
+      .then((res) => {
+        return res.map((item) => {
+          return {
+            ...item,
+            password: this.crypto.decrypt(item.password),
+          };
+        });
+      });
+  }
+
   // 根据用户ID和密码ID获取密码
   async findOne(
     userId: UserEntity['userId'],

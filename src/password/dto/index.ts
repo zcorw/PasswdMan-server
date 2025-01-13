@@ -64,3 +64,18 @@ export class UpdatePasswordDto {
   @Length(0, 1000)
   fields: string;
 }
+
+export type PasswordTableType = UpdatePasswordDto & {
+  groupName: string;
+};
+
+export type PasswordCsvType = {
+  folder: string;
+  type: 'login';
+  name: string;
+  fields?: string;
+  login_uri?: string;
+  login_username?: string;
+  login_password: string;
+  remark?: string;
+};

@@ -12,20 +12,28 @@ import {
   Param,
   BadRequestException,
   HttpException,
+  StreamableFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import * as fs from 'fs';
-import { parse } from 'fast-csv';
+import { parse, format } from 'fast-csv';
 import { PasswordService } from './password.service';
 import { GetUser } from 'src/common/decorators/GetUserDecorator';
 import { EncryptoInterceptor } from 'src/common/interceptor/EncryptoInterceptor';
-import { CreatePasswordDto, UpdatePasswordDto } from './dto';
+import {
+  CreatePasswordDto,
+  UpdatePasswordDto,
+  PasswordCsvType,
+  PasswordTableType,
+} from './dto';
 import { FindByIdDto, OneByIdDto } from './dto/page';
 import { ResultData } from 'src/common/result';
 import { FormValidationPipe } from 'src/common/pipes/FormValidationPipe';
 import type { bitwardenType } from 'src/types/importFile';
 import { GroupService } from './group.service';
+import { FileDownloadInterceptor } from 'src/common/interceptor/FileDownloadInterceptor';
+import { PassThrough } from 'stream';
 
 @Controller('password')
 export class PasswordController {
@@ -100,9 +108,9 @@ export class PasswordController {
               }
             })
             .reduce((res, next) => (next ? res.concat([next]) : res), []);
-          // 这里可以进一步处理 CSV 数据
           await this.passwordService.batchCreate(userId, passwords);
           fs.unlinkSync(file.path);
+          resolve('导入成功');
         });
     });
     return promise
@@ -112,6 +120,48 @@ export class PasswordController {
       .catch((error: Error) => {
         throw new HttpException(error.message, 500);
       });
+  }
+  // 获取所有密码生成一个csv文件
+  @Get('export')
+  @HttpCode(200)
+  @UseInterceptors(new FileDownloadInterceptor('password.csv', 'text/csv'))
+  async exportCsv(@GetUser() user: any): Promise<StreamableFile> {
+    const res = await this.passwordService.findAllByUserId(user.user.userId);
+    const csv: PasswordTableType[] = res.map((item) => {
+      return {
+        name: item.name,
+        uri: item.uri,
+        username: item.username,
+        password: item.password,
+        remark: item.remark,
+        fields: item.fields,
+        groupName: item.group.title,
+      };
+    });
+    const stream = format<PasswordTableType, PasswordCsvType>({
+      headers: true,
+    }).transform((row: PasswordTableType) => {
+      return {
+        name: row.name,
+        login_uri: row.uri,
+        login_username: row.username,
+        login_password: row.password,
+        remark: row.remark,
+        fields: row.fields,
+        folder: row.groupName,
+        type: 'login',
+      };
+    });
+
+    csv.forEach((row) => stream.write(row));
+    stream.end();
+
+    // 创建一个 PassThrough 流并写入 BOM
+    const streamWithBom = new PassThrough();
+    streamWithBom.write('\uFEFF'); // 写入 BOM
+    stream.pipe(streamWithBom); // 将 CSV 数据流传递给 PassThrough 流
+
+    return new StreamableFile(streamWithBom);
   }
   // 获取所有密码
   @Get('list')
