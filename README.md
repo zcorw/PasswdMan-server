@@ -1,92 +1,75 @@
-# 密码管理器
+# PasswdMan Server
 
-## 设置环境
-创建生产环境配置
-```bash
+> [!IMPORTANT]
+> **This project has been archived and is no longer actively maintained.** The current version of PasswdMan is available at [PasswdMan2](https://github.com/zcorw/PasswdMan2).
+
+PasswdMan Server is the NestJS API for the original PasswdMan password manager. It provides authentication and backend services for storing, organizing, searching, importing, and exporting passwords and secure notes.
+
+## Features
+
+- User registration and sign-in with JWT-based authentication.
+- Password creation, retrieval, update, deletion, grouping, pagination, and search.
+- Secure-note management.
+- CSV import and export for password-vault data.
+- Optional AI-assisted parsing of natural-language password queries.
+- Encryption of stored password values.
+- Application-layer encryption for sensitive communication with the UI.
+- HTTP security headers and request rate limiting.
+
+## Encrypted Communication
+
+**Sensitive data exchanged between the UI and server is protected with an additional application-layer encryption flow.** The server generates a 2048-bit RSA key pair and publishes the public key. During login or registration, the UI encrypts a random 128-bit AES session key with RSA-OAEP using SHA-256, encrypts the submitted data with AES-CBC, and signs it with HMAC-SHA256. The server unwraps the AES key, decrypts the payload, verifies its integrity, and can use the session key to encrypt protected responses.
+
+Password values are also encrypted with AES-CBC before being stored in the database. This application-layer encryption is defense in depth and does not replace HTTPS/TLS, which should always be enabled in production.
+
+## Repository Status
+
+This repository belongs to the archived first version of PasswdMan:
+
+- Server: [zcorw/PasswdMan-server](https://github.com/zcorw/PasswdMan-server)
+- UI: [zcorw/PasswdMan-ui](https://github.com/zcorw/PasswdMan-ui)
+- Current version: [zcorw/PasswdMan2](https://github.com/zcorw/PasswdMan2)
+
+## Technology
+
+- NestJS and TypeScript
+- MySQL with TypeORM
+- JWT authentication
+- node-forge and CryptoJS
+- Docker and Docker Compose
+
+## Historical Setup
+
+This setup information is retained for reference because the project is archived.
+
+Install dependencies:
+
+```sh
+npm install
+```
+
+Create a production configuration from the development example:
+
+```sh
 cp config/dev.yml config/prod.yml
 ```
-根据项目实际环境修改配置
-```ymal
-app:
-  # 项目端口号
-  port: 8080
-# 数据库配置
-db:
-  mysql:
-    # 将数据库地址改为mysql容器名称
-    host: 'passwdman-server-db-1'
-    username: 'root'
-    password: '123456'
-    database: 'passwdman-test'
-    port: 3306
-# jwt 配置
-jwt:
-  # 过期时间，尽量短，如'5m'
-  expiresin: '1h'
-# 用户配置
-user:
-  # 是否开启注册
-  enableRegister: true
-```
-复制Dockerfile到根目录
-```bash
-cp docker/Dockerfile Dockerfile
-```
-修改Dockerfile中项目运行端口号，要与上面配置一致
-```
-# 暴露应用运行的端口（例如 8080）
-EXPOSE 8080
-```
-复制docker-compose.yml到根目录
-```bash
-cp docker/docker-compose.yml docker-compose.yml
-```
-修改docker-compose中配置
-```
-version: '3'
-services:
-  app:
-    build: .
-    ports:
-      - "8080:8080" #项目端口
-    depends_on:
-      - db
-    volumes:
-      - .:/app
 
-  db:
-    image: mysql:8.0
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: 123456  #数据库密码
-      MYSQL_DATABASE: passwdman-test  #预设数据库库名
-    volumes:
-      - db_data:/var/lib/mysql
-    networks:
-      - internal
+Review the application port, MySQL connection, JWT expiration, registration setting, and cryptographic configuration before starting the service. Do not use the example credentials or keys in a public deployment.
 
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    restart: always
-    ports:
-      - "8081:80"
-    environment:
-      - PMA_HOST=db
-      - PMA_PORT=3306 
-      - MYSQL_ROOT_PASSWORD=123456 #数据库密码
-    depends_on:
-      - db
-    networks:
-      - internal
+Start a development instance:
 
-volumes:
-  db_data:
-
-networks:
-  internal:
-    driver: bridge
+```sh
+npm run start:dev
 ```
-## 快速开始
-```bash
-docker-compose up --build -d
+
+Build the server:
+
+```sh
+npm run build
+```
+
+For the historical container-based deployment, copy the supplied Docker files to the repository root, ensure their ports and database settings match `config/prod.yml`, and then run:
+
+```sh
+docker compose up --build -d
 ```
